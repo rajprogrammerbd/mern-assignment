@@ -1,26 +1,52 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 import * as jwt from 'jsonwebtoken';
 import { Request } from 'express';
-import { JwtPayload } from '../types/index';
+import { IUser, JwtPayload } from '../types/index';
+import prisma from './db';
+import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-strong-default-secret';
 
 export type TokenType = 'access' | 'refresh';
 
-export const generateToken = (
-  payload: JwtPayload,
-): string => {
+export const generateToken = (payload: JwtPayload): string => {
   return jwt.sign(payload, JWT_SECRET, {
     issuer: 'task-management',
     audience: 'web',
   });
 };
 
-export const verifyToken = (token: string): JwtPayload => {
+export const verifyToken = async (token: string): Promise<IUser> => {
   try {
-    return jwt.verify(token, JWT_SECRET) as JwtPayload;
-  } catch {
-    throw new Error('Invalid or expired token');
+    const payload = jwt.verify(token, JWT_SECRET) as JwtPayload;
+
+    if (!payload.id) {
+      throw new Error('Token payload missing userId');
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: payload.id },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+      },
+    });
+
+    if (!user) {
+      throw new Error('User does not exist');
+    }
+
+    return user;
+  } catch (error) {
+    if (error instanceof TokenExpiredError) {
+      throw new Error('Token has expired');
+    }
+    if (error instanceof JsonWebTokenError) {
+      throw new Error('Invalid token');
+    }
+    console.error(error);
+    throw new Error('Token verification failed');
   }
 };
 
@@ -47,11 +73,16 @@ export const generateTokenPair = (payload: JwtPayload) => {
   };
 };
 
-export const refreshTokens = (refreshToken: string) => {
-  const decoded = verifyToken(refreshToken);
+export const refreshTokens = async (refreshToken: string) => {
+  try {
+    const decoded = await verifyToken(refreshToken);
 
-  return generateTokenPair({
-    userId: decoded.userId,
-    email: decoded.email,
-  });
+    return generateTokenPair({
+      id: decoded.id,
+      email: decoded.email,
+    });
+  } catch (er) {
+    console.error(er);
+    throw new Error('Token refresh failed');
+  }
 };
