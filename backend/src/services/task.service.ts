@@ -79,6 +79,7 @@ export default abstract class TaskService {
           user: {
             select: {
               id: true,
+              username: true,
               email: true,
             },
           },

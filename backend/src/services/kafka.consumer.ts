@@ -86,11 +86,31 @@ export default async function startKafkaConsumer() {
         console.log('eventData', eventData);
         const previousValue = await prisma.task.findUnique({
           where: { id: eventData.taskId },
+          select: {
+            assignedTo: true,
+            description: true,
+            dueDate: true,
+            id: true,
+            priority: true,
+            status: true,
+            title: true,
+            userId: true
+          }
         });
         
         const data = await prisma.task.update({
           where: { id: eventData.taskId },
           data: eventData.fieldChange,
+          select: {
+            assignedTo: true,
+            description: true,
+            dueDate: true,
+            id: true,
+            priority: true,
+            status: true,
+            title: true,
+            userId: true
+          }
         });
 
 
@@ -106,9 +126,10 @@ export default async function startKafkaConsumer() {
         const user = await prisma.user.findUnique({
           where: { id: eventData.userId },
           select: {
-            id: true,
-            username: true,
             email: true,
+            username: true,
+            id: true,
+            password: true
           },
         });
 
@@ -130,8 +151,22 @@ export default async function startKafkaConsumer() {
         try {
           const { taskId, email } = eventData;
 
-          const user = await prisma.user.findUnique({ where: { email } });
-          const task = await prisma.task.findUnique({ where: { id: taskId } });
+          const user = await prisma.user.findUnique({ where: { email }, select: {
+            email: true,
+            id: true,
+            username: true,
+            password: true
+          } });
+          const task = await prisma.task.findUnique({ where: { id: taskId }, select: {
+            assignedTo: true,
+            description: true,
+            dueDate: true,
+            id: true,
+            priority: true,
+            status: true,
+            title: true,
+            userId: true
+          } });
 
           if (!user || !task) {
             console.warn('Missing user or task during deletion:', {
