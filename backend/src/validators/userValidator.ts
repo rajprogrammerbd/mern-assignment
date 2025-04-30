@@ -1,5 +1,8 @@
 import { body } from 'express-validator';
 
+/**
+ * Validation rules for user registration
+ */
 export const registerValidation = [
   body('username')
     .trim()
@@ -19,6 +22,9 @@ export const registerValidation = [
     .withMessage('Password must be at least 6 characters long.'),
 ];
 
+/**
+ * Validation rules for user login
+ */
 export const loginValidation = [
   body('email').isEmail().withMessage('Email is invalid.').normalizeEmail(),
 
