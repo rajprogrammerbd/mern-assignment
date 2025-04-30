@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken, extractToken } from '../utils/jwt'; // Adjust the path as needed
 
-export const authenticate = (
+export const authenticate = async (
   req: Request,
   res: Response,
   next: NextFunction
-): void => {
+): Promise<void> => {
   try {
     const token = extractToken(req);
 
@@ -17,7 +17,8 @@ export const authenticate = (
       return;
     }
 
-    const decoded = verifyToken(token);
+    const decoded = await verifyToken(token);
+
     req.user = decoded;
 
     next();
