@@ -11,25 +11,26 @@ import compression from 'compression';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerOptions from './utils/swaggerOptions';
+import { kafkaProducer } from '../src/services/kafka.service';
+import startKafkaConsumer from '../src/services/kafka.consumer';
 
 // Routes import
 import usersRoute from './routes/users.route';
+import taskRoute from './routes/task.route';
 import { initSocket } from './routes/socket.route';
-
-
 
 const app = express();
 const httpServer = createServer(app);
 
-
-
 const PORT = process.env.PORT || 5000;
 
 // Middleware Integration
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  })
+);
 app.use(helmet());
 app.use(
   morgan(function (tokens, req, res) {
@@ -58,11 +59,16 @@ initSocket(httpServer);
 
 // Routes
 app.use('/api/v1/user', usersRoute);
+app.use('/api/v1/task', taskRoute);
 
-app.get('/', (req: express.Request, res: express.Response) => {
-  res.send('Hello World!');
-});
-
-httpServer.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+httpServer.listen(PORT, async () => {
+  try {
+    await kafkaProducer.connect();
+    await startKafkaConsumer();
+    console.log(`Kafka Producer connected successfully.`);
+    console.log(`Server running at http://kafka:${PORT}`);
+  } catch (err) {
+    console.error('Failed to connect to Kafka:', err);
+    process.exit(1);
+  }
 });
