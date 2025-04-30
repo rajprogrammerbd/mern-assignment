@@ -20,14 +20,9 @@ export default abstract class UserService {
     return newUser;
   };
 
-  static getUserList = async (userEmail?: string): Promise<IUser[]> => {
+  static getUserList = async (): Promise<IUser[]> => {
     try {
       const users = await prisma.user.findMany({
-        where: {
-          email: {
-            not: userEmail ? userEmail : '',
-          },
-        },
         select: {
           id: true,
           username: true,
