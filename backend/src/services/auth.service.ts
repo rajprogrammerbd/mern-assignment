@@ -6,7 +6,18 @@ import { ILoginUserResponse, IUser } from '../types';
 
 const SALT_ROUNDS = 12;
 
+/**
+ * AuthService - Handles authentication-related operations
+ */
 export class AuthService {
+  /**
+   * Registers a new user
+   * @param username User's username
+   * @param email User's email
+   * @param password User's password
+   * @returns {Promise<ILoginUserResponse>} User data and tokens
+   * @throws {ApiError} If email is already in use
+   */
   static async register(username: string, email: string, password: string) {
     const existingUser = await prisma.user.findFirst({
       where: {
@@ -39,7 +50,7 @@ export class AuthService {
 
     // Generate JWT token
     const token = generateTokenPair({
-      userId: user.id,
+      id: user.id,
       email: user.email,
     });
 
@@ -52,7 +63,13 @@ export class AuthService {
     };
   }
 
-  // Login with email and password only
+  /**
+   * Logs in an existing user
+   * @param email User's email
+   * @param password User's password
+   * @returns {Promise<ILoginUserResponse>} User data and tokens
+   * @throws {ApiError} If credentials are invalid
+   */
   static async login(
     email: string,
     password: string
@@ -80,7 +97,7 @@ export class AuthService {
 
     // Generate JWT token
     const token = generateTokenPair({
-      userId: user.id,
+      id: user.id,
       email: user.email,
     });
 
@@ -97,6 +114,11 @@ export class AuthService {
     };
   }
 
+  /**
+   * Gets user by ID
+   * @param userId The user's ID
+   * @returns {Promise<IUser | null>} User data or null if not found
+   */
   static async getUserById(userId: string) {
     return prisma.user.findUnique({
       where: { id: userId },
