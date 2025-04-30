@@ -1,5 +1,5 @@
 export interface JwtPayload {
-  userId: string;
+  id: string;
   email: string;
 }
 
@@ -32,4 +32,48 @@ export interface ILoginUserResponse {
 
 export type WebSocket_IUser = IUser[];
 
-export type WEBSOCKET_EVENTS = 'all_users';
+export type WEBSOCKET_EVENTS =
+  | 'all_users'
+  | 'task-created'
+  | 'task-updated'
+  | 'task-deleted'
+  | 'all-tasks';
+
+export enum Priority {
+  Low = 'Low',
+  Medium = 'Medium',
+  High = 'High',
+}
+
+export enum Status {
+  ToDo = 'ToDo',
+  InProgress = 'InProgress',
+  Done = 'Done',
+}
+
+export interface CreateTaskRequestBody {
+  id: string;
+  title: string;
+  description: string;
+  priority: Priority;
+  status: Status;
+  dueDate: string;
+  userId: string;
+  assignedTo: {
+    username: string;
+    id: string;
+  };
+}
+
+export interface IResultModificationData {
+  taskId: string;
+  changeType: 'DELETED' | 'UPDATED' | 'CREATED';
+  previousValue: {
+    user: IUser;
+    task: CreateTaskRequestBody;
+  };
+  newValue: {
+    user: IUser;
+    task: CreateTaskRequestBody;
+  };
+}
