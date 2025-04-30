@@ -16,7 +16,8 @@ prisma
 const shutdown = async () => {
   await prisma.$disconnect();
   console.log('Prisma client disconnected');
-  process.exit(0);
+
+  await prisma.$connect();
 };
 
 process.on('SIGINT', shutdown);
