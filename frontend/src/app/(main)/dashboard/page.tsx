@@ -38,6 +38,7 @@ export default function DashboardPage() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [date, setDate] = useState<Date | undefined>(undefined);
     const tasks = useAppSelector((state: RootState) => state.allTasks.allTasks);
+    const users = useAppSelector((state: RootState) => state.user);
 
     const filteredTasks = tasks.filter((task: Task) => {
         const matchesSearch =
@@ -184,7 +185,7 @@ export default function DashboardPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <RecentActivity />
+                            {!users && <RecentActivity />}
                         </CardContent>
                     </Card>
                 </CardContent>
