@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CreateTaskRequestBody, IResultModificationData } from '../types';
+import { CreateTaskRequestBody, IResultModificationData, ITaskUpdatedEvent, } from '../types';
 import { KafkaTopics } from '../types/kafkaTopics';
 import { ApiError } from '../utils/ApiError';
 import prisma from '../utils/db';
@@ -9,6 +9,16 @@ import { kafkaProducer } from './kafka.service';
  * TaskService - Handles all task-related business logic
  */
 export default abstract class TaskService {
+  static updateTask = async (body: ITaskUpdatedEvent): Promise<void> => {
+    await kafkaProducer.send({
+      topic: KafkaTopics.TASK_UPDATED,
+      messages: [
+        {
+          value: JSON.stringify(body),
+        },
+      ],
+    });
+  };
   /**
    * Creates a new task by sending to Kafka topic
    * @param body Task creation data

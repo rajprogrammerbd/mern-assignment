@@ -21,7 +21,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useDeleteTaskMutation } from '@/store/api/taskApi';
 import { Task } from '@/types';
 import { format } from 'date-fns';
-import { Edit, MoreHorizontal, Trash, Users } from 'lucide-react';
+import { Edit, MoreHorizontal, Trash } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -241,13 +241,6 @@ export function TaskTable({ tasks }: TaskTableProps) {
                                         >
                                             <Edit className="mr-2 h-4 w-4" />
                                             Edit
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                            className="hover:bg-gray-800 hover:text-white"
-                                            onClick={() => {}}
-                                        >
-                                            <Users className="mr-2 h-4 w-4" />
-                                            Assign
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
                                             className="text-red-400 hover:bg-red-950 hover:text-red-300"

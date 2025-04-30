@@ -1,4 +1,4 @@
-import { ModifiedTask } from '@/types';
+import { ITaskUpdatedEvent, ModifiedTask } from '@/types';
 import { baseApi } from './baseApi';
 
 const taskApi = baseApi.injectEndpoints({
@@ -34,11 +34,23 @@ const taskApi = baseApi.injectEndpoints({
                 };
             },
             invalidatesTags: ['task']
+        }),
+        // Update a task
+        updateTask: builder.mutation({
+
+
+            query: (data: ITaskUpdatedEvent) => {
+                return {
+                    url: '/api/v1/task/update',
+                    method: 'PATCH',
+                    body: data
+                }
+            }
         })
     })
 });
 
-export const { useAllTaskQuery, useAddTaskMutation, useDeleteTaskMutation } =
+export const { useAllTaskQuery, useAddTaskMutation, useDeleteTaskMutation, useUpdateTaskMutation } =
     taskApi;
 
 export default taskApi;

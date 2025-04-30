@@ -70,23 +70,48 @@ export default async function startKafkaConsumer() {
 
         io.emit('task-created', data);
       } else if (topic === KafkaTopics.TASK_UPDATED) {
-        await prisma.task.update({
+        console.log('eventData', eventData);
+        const previousValue = await prisma.task.findUnique({
           where: { id: eventData.taskId },
-          data: {
-            [eventData.fieldChanged]: eventData.newValue,
-          },
         });
+        
+        const data = await prisma.task.update({
+          where: { id: eventData.taskId },
+          data: eventData.fieldChange,
+        });
+
 
         await prisma.taskHistory.create({
           data: {
             taskId: eventData.taskId,
-            changeType: eventData.changeType,
-            previousValue: eventData.previousValue,
-            newValue: eventData.newValue,
+            changeType: 'UPDATED',
+            previousValue,
+            newValue: data,
           },
         });
 
-        io.emit('task-updated', eventData);
+        const user = await prisma.user.findUnique({
+          where: { id: eventData.userId },
+          select: {
+            id: true,
+            username: true,
+            email: true,
+          },
+        });
+
+          const result: IResultModificationData = {
+            taskId: eventData.taskId,
+            changeType: 'UPDATED',
+            previousValue: { user, task: previousValue },
+            newValue: { user, task: data },
+          };
+
+          // First log the history, then delete the task separately
+          await prisma.taskHistory.create({ data: result });
+
+          const allTasks = await TaskService.getAllTasks();
+
+          io.emit('task-updated', { allTasks, result });
       } else if (topic === KafkaTopics.TASK_DELETED) {
         try {
           const { taskId, email } = eventData;

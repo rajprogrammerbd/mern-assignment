@@ -27,31 +27,33 @@ import {
     SelectValue
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/components/ui/use-toast';
+import toast from 'react-hot-toast';
 import { RootState, useAppSelector } from '@/store/store';
-import { Task } from '@/types';
+import { IPriority, IStatus, Task } from '@/types';
 import { format } from 'date-fns';
 import { CalendarIcon, ChevronLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useUpdateTaskMutation } from '@/store/api/taskApi';
 
 export default function EditTaskPage() {
     const router = useRouter();
     const params = useParams();
-    const { toast } = useToast();
     const taskId = params.id as string;
 
-    const [isLoading, setIsLoading] = useState(true);
     const [task, setTask] = useState<Task | null>(null);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [priority, setPriority] = useState('');
-    const [status, setStatus] = useState('');
+    const [priority, setPriority] = useState<IPriority | ''>('');
+    const [status, setStatus] = useState<IStatus | ''>('');
     const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
     const [assignedTo, setAssignedTo] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const tasks = useAppSelector((state: RootState) => state.allTasks.allTasks);
+    const { allUsers } = useAppSelector((state: RootState) => state.allUsers);
+    const user = useAppSelector((state: RootState) => state.user.user);
+
+    const [updateTask, { isLoading }] = useUpdateTaskMutation();
 
     useEffect(() => {
         // Simulate API call to get task details
@@ -64,24 +66,48 @@ export default function EditTaskPage() {
             setPriority(currentTask.priority);
             setStatus(currentTask.status);
             setDueDate(new Date(currentTask.dueDate));
-            setAssignedTo(currentTask.assignedUser.username);
+            // setAssignedTo(currentTask.assignedUser.username);
         }
-
-        setIsLoading(false);
     }, [taskId]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setIsSubmitting(true);
 
-        // Simulate API call to update task
-        setTimeout(() => {
-            toast({
-                title: 'Task updated',
-                description: 'The task has been updated successfully'
-            });
+        if (title.trim() === '') {
+            toast.error('Title is required');
+            return;
+        } else if (description.trim() === '') {
+            toast.error('Description is required');
+            return;
+        } else if (dueDate === undefined) {
+            toast.error('Due date is required');
+            return;
+        } else if (assignedTo.trim() === '') {
+            toast.error('Assigned to is required');
+            return;
+        }
+
+        updateTask({
+            userId: user ? user?.id : '',
+            fieldChange: {
+                title,
+                description,
+                priority,
+                status,
+                dueDate: dueDate.toISOString(),
+                assignedUser: {
+                    connect: {
+                        id: assignedTo
+                    }
+                }
+            },
+            taskId
+        })
+        .unwrap()
+        .then(() => {
             router.push('/dashboard');
-        }, 1000);
+        })
+        .catch((er) => console.log('task add error', er));
     };
 
     if (isLoading) {
@@ -183,7 +209,7 @@ export default function EditTaskPage() {
                                 </Label>
                                 <Select
                                     value={priority}
-                                    onValueChange={setPriority}
+                                    onValueChange={e => setPriority(e as IPriority)}
                                     required
                                 >
                                     <SelectTrigger
@@ -212,7 +238,7 @@ export default function EditTaskPage() {
                                 </Label>
                                 <Select
                                     value={status}
-                                    onValueChange={setStatus}
+                                    onValueChange={e => setStatus(e as IStatus)}
                                     required
                                 >
                                     <SelectTrigger
@@ -222,10 +248,10 @@ export default function EditTaskPage() {
                                         <SelectValue placeholder="Select status" />
                                     </SelectTrigger>
                                     <SelectContent className="border-gray-700 bg-gray-800 text-gray-200">
-                                        <SelectItem value="To Do">
+                                        <SelectItem value="ToDo">
                                             To Do
                                         </SelectItem>
-                                        <SelectItem value="In Progress">
+                                        <SelectItem value="InProgress">
                                             In Progress
                                         </SelectItem>
                                         <SelectItem value="Done">
@@ -287,24 +313,11 @@ export default function EditTaskPage() {
                                         <SelectValue placeholder="Select team member" />
                                     </SelectTrigger>
                                     <SelectContent className="border-gray-700 bg-gray-800 text-gray-200">
-                                        <SelectItem value="John Doe">
-                                            John Doe
-                                        </SelectItem>
-                                        <SelectItem value="Jane Smith">
-                                            Jane Smith
-                                        </SelectItem>
-                                        <SelectItem value="Alex Johnson">
-                                            Alex Johnson
-                                        </SelectItem>
-                                        <SelectItem value="Sarah Williams">
-                                            Sarah Williams
-                                        </SelectItem>
-                                        <SelectItem value="Michael Brown">
-                                            Michael Brown
-                                        </SelectItem>
-                                        <SelectItem value="Emily Davis">
-                                            Emily Davis
-                                        </SelectItem>
+                                        {allUsers.map((u) => (
+                                            <SelectItem key={u.id} value={u.id}>
+                                                {u.username}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -322,9 +335,9 @@ export default function EditTaskPage() {
                         <Button
                             type="submit"
                             className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600"
-                            disabled={isSubmitting}
+                            disabled={isLoading}
                         >
-                            {isSubmitting ? 'Saving...' : 'Save Changes'}
+                            {isLoading ? 'Saving...' : 'Save Changes'}
                         </Button>
                     </CardFooter>
                 </form>

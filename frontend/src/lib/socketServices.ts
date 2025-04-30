@@ -92,11 +92,22 @@ export const connectSocket = (
                 console.log('task-deleted', data);
                 if (user.email !== data.result.newValue.user.email) {
                     toast.success('A task has been deleted');
+                }
+                dispatch(addAllTasks(data.allTasks));
+                dispatch(addTaskHistory(data.result));
+            }
+        );
+
+        socket.on('task-updated',
+            (data: { allTasks: Task[]; result: IResultModificationData }) => {
+                console.log('task-updated', data);
+                if (user.email !== data.result.newValue.user.email) {
+                    toast.success('A task has been updated');
                     dispatch(addAllTasks(data.allTasks));
                 }
                 dispatch(addTaskHistory(data.result));
             }
-        );
+        )
 
         socket.on('all-task-history', (data: IResultModificationData[]) => {
             dispatch(addAllTasksHistory(data));

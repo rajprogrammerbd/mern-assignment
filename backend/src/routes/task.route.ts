@@ -2,6 +2,7 @@ import { Router } from 'express';
 import TaskController from '../controllers/task.controller';
 import { authenticate } from '../middlewares/authMiddleware';
 import { param } from 'express-validator';
+import { validateTaskUpdate } from '../validators/taskUpdatedValidator';
 
 const router = Router();
 
@@ -102,5 +103,7 @@ router.delete(
   [param('taskId').isMongoId().withMessage('Invalid task ID'), authenticate],
   TaskController.deleteTask
 );
+
+router.patch('/update', [authenticate, ...validateTaskUpdate], TaskController.updateTask)
 
 export default router;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface JwtPayload {
   id: string;
   email: string;
@@ -65,9 +66,11 @@ export interface CreateTaskRequestBody {
   };
 }
 
+export type CHANGE_TYPE = 'DELETED' | 'UPDATED' | 'CREATED';
+
 export interface IResultModificationData {
   taskId: string;
-  changeType: 'DELETED' | 'UPDATED' | 'CREATED';
+  changeType: CHANGE_TYPE;
   previousValue: {
     user: IUser;
     task: CreateTaskRequestBody;
@@ -76,4 +79,14 @@ export interface IResultModificationData {
     user: IUser;
     task: CreateTaskRequestBody;
   };
+}
+export type IPriority = 'Low' | 'Medium' | 'High';
+export type IStatus = 'ToDo' | 'InProgress' | 'Done';
+
+export interface ITaskUpdatedEvent {
+  taskId: string;
+  fieldChange: {
+    [key: string]: any;
+  };
+  userId: string;
 }

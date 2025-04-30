@@ -2,6 +2,7 @@
 import { Request, Response } from 'express';
 import { createTaskValidation } from '../validators/taskCreationValidator';
 import TaskService from '../services/task.service';
+import { validateTaskUpdate } from '../validators/taskUpdatedValidator';
 
 /**
  * TaskController - Handles all task-related operations
@@ -11,6 +12,8 @@ export default abstract class TaskController {
    * Express-validator middleware for task creation validation
    */
   static createTaskValidation = createTaskValidation;
+
+  static taskUpdatedValidator = validateTaskUpdate;
 
   /**
    * Deletes a task
@@ -62,6 +65,21 @@ export default abstract class TaskController {
       const tasks = await TaskService.getAllTasks();
 
       res.status(200).json(tasks);
+    } catch (err: any) {
+      res.status(err?.statusCode || 500).json({
+        error: true,
+        message: err?.message || 'Internal Server Error',
+      });
+    }
+  };
+
+  static updateTask = async (req: Request, res: Response) => {
+    try {
+      await TaskService.updateTask({
+        ...req.body
+      });
+
+      res.status(201).end();
     } catch (err: any) {
       res.status(err?.statusCode || 500).json({
         error: true,

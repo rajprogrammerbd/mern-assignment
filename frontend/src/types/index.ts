@@ -113,3 +113,13 @@ export interface IResultModificationData {
 }
 
 export type UPDATES_TYPE = 'DELETED' | 'UPDATED' | 'CREATED';
+export type IPriority = 'Low' | 'Medium' | 'High';
+export type IStatus = 'ToDo' | 'InProgress' | 'Done';
+  
+export interface ITaskUpdatedEvent {
+taskId: string;
+fieldChange: {
+    [key: string]: any;
+};
+userId: string;
+}
