@@ -1,24 +1,21 @@
-// Prisma Client Generator: Generates the Prisma Client for database access
 generator client {
   provider = "prisma-client-js"
 }
 
-// Database Configuration: Points to your PostgreSQL connection using an environment variable
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// User Model: Represents users who can log in and manage tasks
 model User {
-  id       String   @id @default(uuid())
-  username String
-  email    String   @unique
-  password String
-  tasks    Task[]   @relation("UserTasks")
+  id          String   @id @default(uuid())
+  username    String
+  email       String   @unique
+  password    String
+  tasks       Task[]   @relation("UserTasks") 
+  assignedTasks Task[] @relation("AssignedTasks")
 }
 
-// Task Model: Represents each task in the system
 model Task {
   id          String      @id @default(uuid())
   title       String
@@ -28,21 +25,19 @@ model Task {
   dueDate     DateTime
   userId      String
   user        User        @relation("UserTasks", fields: [userId], references: [id])
-  histories   TaskHistory[]
+  assignedTo  String
+  assignedUser User?      @relation("AssignedTasks", fields: [assignedTo], references: [id])
 }
 
-// TaskHistory Model: Tracks changes to tasks (e.g., status updates)
 model TaskHistory {
   id            String   @id @default(uuid())
   taskId        String
-  task          Task     @relation(fields: [taskId], references: [id])
-  changeType    String   // e.g., status_change, title_change
+  changeType    ChangeType
   previousValue Json
   newValue      Json
   timestamp     DateTime @default(now())
 }
 
-// Enums for priority and status fields
 enum Priority {
   Low
   Medium
@@ -53,4 +48,9 @@ enum Status {
   ToDo
   InProgress
   Done
+}
+
+enum ChangeType {
+  DELETED
+  UPDATED
 }
