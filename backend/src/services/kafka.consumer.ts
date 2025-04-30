@@ -28,6 +28,19 @@ export default async function startKafkaConsumer() {
       const eventData = JSON.parse(message.value!.toString());
 
       if (topic === KafkaTopics.TASK_CREATED) {
+        const [user, assignedUser] = await Promise.all([
+          prisma.user.findUnique({ where: { id: eventData.userId } }),
+          prisma.user.findUnique({ where: { id: eventData.assignedTo } }),
+        ]);
+        
+        if (!user || !assignedUser) {
+          console.error('User or assigned user not found:', {
+            userId: eventData.userId,
+            assignedTo: eventData.assignedTo,
+          });
+          return; // Skip task creation or handle accordingly
+        }
+  
         const data = await prisma.task.create({
           data: {
             title: eventData.title,
@@ -113,6 +126,7 @@ export default async function startKafkaConsumer() {
 
           io.emit('task-updated', { allTasks, result });
       } else if (topic === KafkaTopics.TASK_DELETED) {
+        console.log('deleted', eventData);
         try {
           const { taskId, email } = eventData;
 

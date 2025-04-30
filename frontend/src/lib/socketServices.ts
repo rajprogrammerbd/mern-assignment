@@ -103,8 +103,8 @@ export const connectSocket = (
                 console.log('task-updated', data);
                 if (user.email !== data.result.newValue.user.email) {
                     toast.success('A task has been updated');
-                    dispatch(addAllTasks(data.allTasks));
                 }
+                dispatch(addAllTasks(data.allTasks));
                 dispatch(addTaskHistory(data.result));
             }
         )
