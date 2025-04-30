@@ -1,7 +1,6 @@
 'use client';
 
-import type React from 'react';
-
+import { useEffect, useState } from 'react';
 // import { NotificationPanel } from '@/components/notification-panel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 // import { Badge } from '@/components/ui/badge';
@@ -19,7 +18,7 @@ import { logout } from '@/store/thunk/login';
 import { CheckSquare, LogOut, Menu, Plus, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { RootState, useAppSelector } from '@/store/store';
 
 export default function DashboardLayout({
     children
@@ -30,6 +29,7 @@ export default function DashboardLayout({
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     // const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     // const [notificationCount, setNotificationCount] = useState(3);
+    const username = useAppSelector((state: RootState) => state.user.user.username);
 
     const dispatch = useAppDispatch();
 
@@ -132,7 +132,7 @@ export default function DashboardLayout({
                                 alt="User"
                             />
                             <AvatarFallback className="bg-gray-800 text-gray-300">
-                                JD
+                                {username.split(' ').map((n) => n[0]).join('')}
                             </AvatarFallback>
                         </Avatar>
                     </div>
