@@ -29,7 +29,7 @@ export default function DashboardLayout({
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     // const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     // const [notificationCount, setNotificationCount] = useState(3);
-    const username = useAppSelector((state: RootState) => state.user.user.username);
+    const user = useAppSelector((state: RootState) => state.user);
 
     const dispatch = useAppDispatch();
 
@@ -131,9 +131,11 @@ export default function DashboardLayout({
                                 src="/placeholder.svg?height=32&width=32"
                                 alt="User"
                             />
-                            <AvatarFallback className="bg-gray-800 text-gray-300">
-                                {username.split(' ').map((n) => n[0]).join('')}
-                            </AvatarFallback>
+                            {user.user && (
+                                <AvatarFallback className="bg-gray-800 text-gray-300">
+                                    {user.user.username.split(' ').map((n) => n[0]).join('')}
+                                </AvatarFallback>                                
+                            )}
                         </Avatar>
                     </div>
                 </div>
