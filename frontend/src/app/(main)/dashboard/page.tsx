@@ -185,7 +185,7 @@ export default function DashboardPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            {users && <RecentActivity />}
+                            {!users && <RecentActivity />}
                         </CardContent>
                     </Card>
                 </CardContent>
