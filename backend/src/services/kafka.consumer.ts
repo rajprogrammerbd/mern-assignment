@@ -136,8 +136,8 @@ export default async function startKafkaConsumer() {
           const result: IResultModificationData = {
             taskId: eventData.taskId,
             changeType: 'UPDATED',
-            previousValue: { user, task: previousValue },
-            newValue: { user, task: data },
+            previousValue: { user: user, task: previousValue },
+            newValue: { user: user, task: data },
           };
 
           // First log the history, then delete the task separately
