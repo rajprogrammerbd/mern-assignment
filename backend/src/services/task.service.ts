@@ -152,8 +152,60 @@ export default abstract class TaskService {
           },
         },
       });
-
-      return tasks;
+  
+      // Transform to match IResultModificationData
+      const formattedTasks: IResultModificationData[] = tasks.map((t) => ({
+        taskId: t.taskId,
+        changeType: t.changeType,
+        previousValue: {
+          user: {
+            id: t.previousValue.user.id,
+            email: t.previousValue.user.email,
+          },
+          task: {
+            id: t.previousValue.task.id,
+            title: t.previousValue.task.title,
+            description: t.previousValue.task.description,
+            priority: t.previousValue.task.priority,
+            status: t.previousValue.task.status,
+            dueDate: t.previousValue.task.dueDate,
+            userId: t.previousValue.task.userId,
+            assignedUser: {
+              id: t.previousValue.task.assignedTo.id,
+              username: t.previousValue.task.assignedTo.username,
+            },
+            user: {
+              id: t.previousValue.user.id,
+              email: t.previousValue.user.email,
+            },
+          },
+        },
+        newValue: {
+          user: {
+            id: t.newValue.user.id,
+            email: t.newValue.user.email,
+          },
+          task: {
+            id: t.newValue.task.id,
+            title: t.newValue.task.title,
+            description: t.newValue.task.description,
+            priority: t.newValue.task.priority,
+            status: t.newValue.task.status,
+            dueDate: t.newValue.task.dueDate,
+            userId: t.newValue.task.userId,
+            assignedUser: {
+              id: t.newValue.task.assignedTo.id,
+              username: t.newValue.task.assignedTo.username,
+            },
+            user: {
+              id: t.newValue.user.id,
+              email: t.newValue.user.email,
+            },
+          },
+        },
+      }));
+  
+      return formattedTasks;
     } catch (er: any) {
       throw new ApiError(er.statusCode, er);
     }

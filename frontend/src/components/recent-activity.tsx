@@ -18,7 +18,7 @@ export function RecentActivity() {
         (state: RootState) => state.allTasks.taskHistory
     );
 
-    console.log('acitivities', activities);
+console.log('activities', activities);
 
     return (
         <ScrollArea className="h-auto pr-4">

@@ -110,6 +110,7 @@ export const connectSocket = (
         )
 
         socket.on('all-task-history', (data: IResultModificationData[]) => {
+            console.log('all-task-history', data);
             dispatch(addAllTasksHistory(data));
         });
     }
